@@ -17,11 +17,18 @@ export class PreferencesUtil {
   }
 
   private static store(): preferences.Preferences {
-    if (PreferencesUtil.pref === null) {
-      PreferencesUtil.pref =
-        preferences.getPreferencesSync(PreferencesUtil.ctx, { name: PreferencesUtil.STORE_NAME });
+    const cached: preferences.Preferences | null = PreferencesUtil.pref;
+    if (cached !== null) {
+      return cached;
     }
-    return PreferencesUtil.pref;
+    const ctx: common.Context | null = PreferencesUtil.ctx;
+    if (ctx === null) {
+      throw new Error('PreferencesUtil.init() must be called in EntryAbility.onCreate first');
+    }
+    const created: preferences.Preferences =
+      preferences.getPreferencesSync(ctx, { name: PreferencesUtil.STORE_NAME });
+    PreferencesUtil.pref = created;
+    return created;
   }
 
   static putString(key: string, value: string): void {

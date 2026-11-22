@@ -3,7 +3,7 @@ import { Song } from '../model/Models';
 import { musicStore } from './MusicStore';
 
 /** 播放模式 */
-export enum PlayMode {
+export enum LoopMode {
   SEQUENCE = 0, // 顺序播放
   SHUFFLE = 1,  // 随机播放
   SINGLE = 2    // 单曲循环
@@ -22,7 +22,7 @@ export class PlayerState {
   @Trace isLoading: boolean = false;
   @Trace position: number = 0;   // 当前进度（毫秒）
   @Trace duration: number = 0;   // 总时长（毫秒）
-  @Trace mode: PlayMode = PlayMode.SEQUENCE;
+  @Trace mode: LoopMode = LoopMode.SEQUENCE;
   /** 预览器降级标志：AVPlayer 在 Previewer 中可能无法出声，自动切换为定时器模拟播放 */
   @Trace simulated: boolean = false;
 }
@@ -77,12 +77,12 @@ export class PlayerController {
     if (n === 0) {
       return;
     }
-    if (playerState.mode === PlayMode.SINGLE && auto) {
+    if (playerState.mode === LoopMode.SINGLE && auto) {
       PlayerController.startCurrent();
       return;
     }
     let idx: number = playerState.currentIndex;
-    if (playerState.mode === PlayMode.SHUFFLE) {
+    if (playerState.mode === LoopMode.SHUFFLE) {
       idx = Math.floor(Math.random() * n);
       if (idx === playerState.currentIndex) {
         idx = (idx + 1) % n;
@@ -120,10 +120,10 @@ export class PlayerController {
   }
 
   static modeLabel(): string {
-    if (playerState.mode === PlayMode.SHUFFLE) {
+    if (playerState.mode === LoopMode.SHUFFLE) {
       return '随机播放';
     }
-    if (playerState.mode === PlayMode.SINGLE) {
+    if (playerState.mode === LoopMode.SINGLE) {
       return '单曲循环';
     }
     return '顺序播放';

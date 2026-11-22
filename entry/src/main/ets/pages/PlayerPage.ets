@@ -1,7 +1,7 @@
 import { AppColors } from '../common/Constants';
 import { Router } from '../common/Router';
 import { Song } from '../model/Models';
-import { PlayMode, PlayerController, playerState } from '../viewmodel/PlayerStore';
+import { LoopMode, PlayerController, playerState } from '../viewmodel/PlayerStore';
 import { musicStore } from '../viewmodel/MusicStore';
 import { msToTime } from '../utils/Format';
 
@@ -49,10 +49,10 @@ export struct PlayerPage {
   }
 
   private modeIcon(): Resource {
-    if (playerState.mode === PlayMode.SHUFFLE) {
+    if (playerState.mode === LoopMode.SHUFFLE) {
       return $r('sys.symbol.shuffle');
     }
-    if (playerState.mode === PlayMode.SINGLE) {
+    if (playerState.mode === LoopMode.SINGLE) {
       return $r('sys.symbol.repeat_1');
     }
     return $r('sys.symbol.repeat');

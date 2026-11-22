@@ -36,20 +36,26 @@ export class MockApi {
     return MockApi.pipe(data, 600);
   }
 
+  /** 按 id 列表展开为完整歌曲列表（保持传入顺序） */
+  private static expandSongs(ids: number[]): Song[] {
+    const songs: Song[] = [];
+    ids.forEach((id: number) => {
+      const found: Song | undefined = MOCK_SONGS.find((s: Song) => s.id === id);
+      if (found !== undefined) {
+        songs.push(found);
+      }
+    });
+    return songs;
+  }
+
   /** 歌单详情：按歌单 songIds 展开为完整歌曲列表 */
   static getPlaylistSongs(playlist: Playlist): Promise<Song[]> {
-    const songs: Song[] = playlist.songIds
-      .map((id: number) => MOCK_SONGS.find((s: Song) => s.id === id))
-      .filter((s: Song | undefined): s is Song => s !== undefined);
-    return MockApi.pipe(songs, 400);
+    return MockApi.pipe(MockApi.expandSongs(playlist.songIds), 400);
   }
 
   /** 排行榜歌曲列表 */
   static getRankSongs(rank: RankList): Promise<Song[]> {
-    const songs: Song[] = rank.songIds
-      .map((id: number) => MOCK_SONGS.find((s: Song) => s.id === id))
-      .filter((s: Song | undefined): s is Song => s !== undefined);
-    return MockApi.pipe(songs, 400);
+    return MockApi.pipe(MockApi.expandSongs(rank.songIds), 400);
   }
 
   /** 本地搜索（远端接口不可用时的降级方案）：按歌名/歌手/专辑模糊匹配 */

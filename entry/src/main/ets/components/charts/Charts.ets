@@ -42,7 +42,7 @@ export struct LineChart {
     // 网格线与纵轴刻度
     ctx.strokeStyle = AppColors.DIVIDER;
     ctx.lineWidth = 1;
-    ctx.font = '10vp sans-serif';
+    ctx.font = '10px sans-serif';
     ctx.fillStyle = AppColors.TEXT_SUB;
     for (let i = 0; i <= 4; i++) {
       const y: number = padT + chartH - chartH * i / 4;
@@ -227,14 +227,12 @@ export struct BarChart {
       const barW: number = (w - labelW - 46) * d.count / maxV;
       // 歌手名
       ctx.fillStyle = AppColors.TEXT_MAIN;
-      ctx.font = '12vp sans-serif';
+      ctx.font = '12px sans-serif';
       const name: string = d.artist.length > 5 ? `${d.artist.substring(0, 5)}…` : d.artist;
       ctx.fillText(name, 0, y + barH / 2 + 4);
-      // 圆角柱体
+      // 柱体
       ctx.fillStyle = PALETTE[i % PALETTE.length];
-      ctx.beginPath();
-      ctx.roundRect(labelW, y, Math.max(barW, 4), barH, [barH / 2, barH / 2, barH / 2, barH / 2]);
-      ctx.fill();
+      ctx.fillRect(labelW, y, Math.max(barW, 4), barH);
       // 数值
       ctx.fillStyle = AppColors.TEXT_SUB;
       ctx.fillText(`${d.count}`, labelW + Math.max(barW, 4) + 8, y + barH / 2 + 4);

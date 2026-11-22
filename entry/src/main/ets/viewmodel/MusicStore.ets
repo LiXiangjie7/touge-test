@@ -69,7 +69,9 @@ let storeInstance: MusicStore | null = null;
 /** 获取全局 MusicStore（懒加载注册进 AppStorageV2） */
 export function musicStore(): MusicStore {
   if (storeInstance === null) {
-    storeInstance = AppStorageV2.connect(MusicStore, 'musicStore', () => new MusicStore())!;
+    const connected: MusicStore | undefined =
+      AppStorageV2.connect(MusicStore, 'musicStore', () => new MusicStore());
+    storeInstance = connected ?? new MusicStore();
   }
   return storeInstance;
 }
