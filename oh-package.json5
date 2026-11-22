@@ -1,0 +1,10 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "yunlemusic",
+  "version": "1.0.0",
+  "description": "云乐 —— 类网易云音乐的 HarmonyOS 音乐应用（移动应用开发课程设计）",
+  "main": "",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
