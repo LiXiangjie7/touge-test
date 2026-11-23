@@ -139,6 +139,14 @@ export struct PlayerPage {
         .width('100%')
         .padding({ bottom: 20 })
 
+        // 预览器降级提示：模拟播放时无声
+        if (playerState.simulated) {
+          Text('预览环境模拟播放中（无声，进度/歌词/切歌正常演示）')
+            .fontSize(11)
+            .fontColor(AppColors.WHITE_30)
+            .padding({ bottom: 10 })
+        }
+
         // 进度条
         Row({ space: 8 }) {
           Text(msToTime(playerState.position))

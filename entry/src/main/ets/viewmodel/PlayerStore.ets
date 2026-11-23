@@ -39,6 +39,8 @@ export const playerState: PlayerState = new PlayerState();
 export class PlayerController {
   private static player: media.AVPlayer | null = null;
   private static timer: number = -1;
+  /** 加载看门狗：真实播放器长时间未出声时自动降级模拟播放 */
+  private static watchdog: number = -1;
 
   /** 播放指定歌曲，并以其所在列表作为播放队列 */
   static async playSong(song: Song, list: Song[]): Promise<void> {
@@ -137,6 +139,7 @@ export class PlayerController {
       return;
     }
     PlayerController.stopSimulate();
+    PlayerController.clearWatchdog();
     PlayerController.release();
 
     playerState.currentSong = song;
@@ -155,9 +158,24 @@ export class PlayerController {
       PlayerController.player = p;
       PlayerController.bindEvents(p);
       p.url = song.playUrl; // 设置 url 后进入 initialized，由 stateChange 驱动后续流程
+      // 看门狗：6 秒内未进入播放态（如 Previewer 网络媒体挂起），自动降级模拟播放
+      const songId: number = song.id;
+      PlayerController.watchdog = setTimeout(() => {
+        if (!playerState.isPlaying && !playerState.simulated && playerState.currentSong?.id === songId) {
+          console.warn('PlayerController watchdog: player stalled, enter simulate mode');
+          PlayerController.enterSimulate();
+        }
+      }, 6000);
     } catch (e) {
       console.warn(`PlayerController startCurrent failed, enter simulate mode: ${String(e)}`);
       PlayerController.enterSimulate();
+    }
+  }
+
+  private static clearWatchdog(): void {
+    if (PlayerController.watchdog >= 0) {
+      clearTimeout(PlayerController.watchdog);
+      PlayerController.watchdog = -1;
     }
   }
 
@@ -170,6 +188,7 @@ export class PlayerController {
       } else if (state === 'playing') {
         playerState.isPlaying = true;
         playerState.isLoading = false;
+        PlayerController.clearWatchdog();
       } else if (state === 'paused') {
         playerState.isPlaying = false;
       } else if (state === 'completed') {
@@ -193,6 +212,7 @@ export class PlayerController {
 
   /** 进入模拟播放（预览器降级）：定时器驱动进度，播放完自动切歌 */
   private static enterSimulate(): void {
+    PlayerController.clearWatchdog();
     PlayerController.release();
     playerState.simulated = true;
     playerState.isLoading = false;

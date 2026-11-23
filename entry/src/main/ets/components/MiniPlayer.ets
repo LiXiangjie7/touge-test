@@ -27,7 +27,9 @@ export struct MiniPlayer {
             .fontColor(AppColors.TEXT_MAIN)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-          Text(playerState.currentSong?.artist ?? '')
+          Text(playerState.simulated
+            ? `${playerState.currentSong?.artist ?? ''} · 模拟播放`
+            : playerState.currentSong?.artist ?? '')
             .fontSize(11)
             .fontColor(AppColors.TEXT_SUB)
             .maxLines(1)
