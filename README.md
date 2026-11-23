@@ -23,7 +23,7 @@
 - **自定义组件**：`SongListItem`、`PlaylistCard`、`SectionHeader`、`MiniPlayer`、`TabBar`、`LoadingView / ErrorView / EmptyView`、`LineChart / PieChart / BarChart`
 - **状态管理 V2**：`@ObservedV2` / `@Trace` / `@Local` / `@Param` / `@Event` / `@Monitor` / `AppStorageV2`
 - **Navigation 路由**：NavPathStack 统一管理路由栈，多页面跳转 + 传参 + 返回
-- **网络交互（硬性）**：`@kit.NetworkKit` 封装 HttpUtil；搜索走真实远端接口，其余走 Mock 接口（考核允许）；全页面具备 加载中 / 异常（可重试）/ 空数据 三态；「我的 → 模拟网络异常」开关可现场演示错误态
+- **网络交互（硬性）**：`@kit.NetworkKit` 封装 HttpUtil；搜索走真实远端接口，其余走 Mock 接口（考核允许）；全页面具备 加载中 / 异常（可重试）/ 空数据 三态；「我的 → 网络状态模拟」支持 正常 / 慢速网络 / 网络异常 / 空数据 四档切换，可现场演示三种容错态
 - **Git 版本管理**：按开发阶段分段提交，commit 信息语义化
 - **加分项·数据可视化**：统计页三类 Canvas 自绘图表，数据经接口异步获取并叠加本地真实播放记录
 

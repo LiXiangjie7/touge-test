@@ -25,7 +25,7 @@ export struct StatsPage {
     ApiService.getListenStats(musicStore().extraMinutesToday)
       .then((stats: ListenStats) => {
         this.stats = stats;
-        this.state = LoadState.SUCCESS;
+        this.state = stats.weeklyMinutes.length === 0 ? LoadState.EMPTY : LoadState.SUCCESS;
       })
       .catch((e: Object) => {
         console.error(`StatsPage load failed: ${String(e)}`);

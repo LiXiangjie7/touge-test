@@ -1,6 +1,6 @@
 import { AppColors, StoreKeys } from '../common/Constants';
 import { Song } from '../model/Models';
-import { MockApi } from '../network/MockApi';
+import { MockApi, SimulateMode } from '../network/MockApi';
 import { PlayerController } from '../viewmodel/PlayerStore';
 import { musicStore } from '../viewmodel/MusicStore';
 import { PreferencesUtil } from '../utils/PreferencesUtil';
@@ -10,17 +10,22 @@ import { EmptyView } from '../components/StateViews';
 /**
  * 我的页面：
  * 用户信息卡 + 数据统计 + 我喜欢的音乐 + 最近播放（均经 Preferences 持久化）
- * + 设置区（"模拟网络异常"开关，用于演示各页面的错误态与重试逻辑）。
+ * + 设置区（"网络状态模拟"四档切换：正常/慢速网络/网络异常/空数据，
+ *   用于演示各页面的加载提示、失败重试与空数据容错）。
  */
 @ComponentV2
 export struct MinePage {
-  @Local simulateError: boolean = MockApi.simulateError;
+  @Local simulateMode: string = MockApi.simulateMode;
   @Local showFavorites: boolean = true; // true=收藏列表 false=最近播放
 
-  private onToggleSimulate(value: boolean): void {
-    this.simulateError = value;
-    MockApi.simulateError = value;
-    PreferencesUtil.putBool(StoreKeys.SIMULATE_ERROR, value);
+  /** 档位标签与取值（与 MockApi.SimulateMode 对应） */
+  private readonly modeLabels: string[] = ['正常', '慢速网络', '网络异常', '空数据'];
+  private readonly modeValues: string[] = ['normal', 'slow', 'error', 'empty'];
+
+  private onSelectMode(index: number): void {
+    this.simulateMode = this.modeValues[index];
+    MockApi.simulateMode = this.modeValues[index] as SimulateMode;
+    PreferencesUtil.putString(StoreKeys.SIMULATE_MODE, this.simulateMode);
   }
 
   build() {
@@ -159,25 +164,37 @@ export struct MinePage {
         .clip(true)
         .backgroundColor(AppColors.CARD)
 
-        // 设置区
+        // 设置区：网络状态模拟（四档，演示三种容错态）
         Column() {
-          Row() {
-            Column({ space: 2 }) {
-              Text('模拟网络异常')
-                .fontSize(14)
-                .fontColor(AppColors.TEXT_MAIN)
-              Text('开启后所有接口返回失败，用于演示错误态与重试')
-                .fontSize(10)
-                .fontColor(AppColors.TEXT_SUB)
-            }
-            .alignItems(HorizontalAlign.Start)
-            .layoutWeight(1)
-            Toggle({ type: ToggleType.Switch, isOn: this.simulateError })
-              .selectedColor(AppColors.PRIMARY)
-              .onChange((value: boolean) => this.onToggleSimulate(value))
+          Column({ space: 4 }) {
+            Text('网络状态模拟')
+              .fontSize(14)
+              .fontColor(AppColors.TEXT_MAIN)
+              .width('100%')
+            Text('用于演示网络请求的加载提示、失败重试与空数据容错（切档后重新进入页面生效）')
+              .fontSize(10)
+              .fontColor(AppColors.TEXT_SUB)
+              .width('100%')
+          }
+          .alignItems(HorizontalAlign.Start)
+          .width('100%')
+          .padding({ left: 16, right: 16, top: 12, bottom: 4 })
+
+          Flex({ wrap: FlexWrap.Wrap }) {
+            ForEach(this.modeLabels, (label: string, index: number) => {
+              Text(label)
+                .fontSize(12)
+                .fontColor(this.simulateMode === this.modeValues[index] ? Color.White : AppColors.TEXT_MAIN)
+                .padding({ left: 14, right: 14, top: 7, bottom: 7 })
+                .backgroundColor(this.simulateMode === this.modeValues[index]
+                  ? AppColors.PRIMARY : AppColors.BG)
+                .borderRadius(15)
+                .margin({ right: 10, top: 8, bottom: 8 })
+                .onClick(() => this.onSelectMode(index))
+            }, (label: string) => label)
           }
           .width('100%')
-          .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+          .padding({ left: 16, right: 16, bottom: 4 })
 
           Divider().color(AppColors.DIVIDER).strokeWidth(0.5).margin({ left: 16, right: 16 })
 

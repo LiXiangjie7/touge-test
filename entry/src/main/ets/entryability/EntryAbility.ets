@@ -3,20 +3,20 @@ import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { PreferencesUtil } from '../utils/PreferencesUtil';
 import { musicStore } from '../viewmodel/MusicStore';
-import { MockApi } from '../network/MockApi';
+import { MockApi, SimulateMode } from '../network/MockApi';
 import { StoreKeys } from '../common/Constants';
 
 /**
  * 应用入口 Ability：
  *  - 初始化首选项工具
  *  - 初始化全局数据仓库（收藏 / 最近播放 / 听歌统计）
- *  - 恢复"模拟网络异常"开关状态（用于演示容错处理）
+ *  - 恢复"网络状态模拟"档位（用于演示加载/失败/空数据容错）
  */
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     PreferencesUtil.init(this.context);
     musicStore().init();
-    MockApi.simulateError = PreferencesUtil.getBool(StoreKeys.SIMULATE_ERROR, false);
+    MockApi.simulateMode = PreferencesUtil.getString(StoreKeys.SIMULATE_MODE, 'normal') as SimulateMode;
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {

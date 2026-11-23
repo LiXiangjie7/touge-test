@@ -39,7 +39,8 @@ export class StoreKeys {
   static readonly FAVORITES: string = 'favorites';
   static readonly HISTORY: string = 'history';
   static readonly EXTRA_MINUTES: string = 'extra_minutes';
-  static readonly SIMULATE_ERROR: string = 'simulate_error';
+  /** 网络状态模拟档位：normal / slow / error / empty */
+  static readonly SIMULATE_MODE: string = 'simulate_mode';
 }
 
 /** 网络配置 */
