@@ -1,18 +1,19 @@
 import { promptAction } from '@kit.ArkUI';
-import { AppColors, LoadState } from '../common/Constants';
+import { AppColors, AppRoutes, LoadState } from '../common/Constants';
 import { Router } from '../common/Router';
-import { FriendItem, UserProfile } from '../model/Models';
+import { ArtistInfo, FriendItem, UserProfile } from '../model/Models';
 import { ApiService } from '../network/ApiService';
 import { userStore } from '../viewmodel/UserStore';
 import { EmptyView, ErrorView, LoadingView } from '../components/StateViews';
+import { formatCount } from '../utils/Format';
 
 /**
  * 个人资料页（NavDestination）：
  * 由"我的"页面用户卡片点击进入。
  *  - 资料编辑：姓名（昵称）、年龄、个人名片，保存后经 Preferences 持久化，
  *    "我的"页面实时联动刷新；
- *  - 关注 / 好友列表：经 ApiService 异步获取（具备加载/异常/空数据三态容错），
- *    支持关注 / 取消关注，关注状态持久化。
+ *  - 关注 / 好友 / 歌手 三个列表：经 ApiService 异步获取（加载/异常/空数据三态容错），
+ *    支持关注 / 取消关注；点击歌手进入歌手主页。
  */
 @ComponentV2
 export struct ProfilePage {
@@ -20,28 +21,32 @@ export struct ProfilePage {
   @Local ageText: string = '';
   @Local signature: string = '';
   @Local friends: FriendItem[] = [];
-  @Local friendState: LoadState = LoadState.LOADING;
-  /** true=我的关注 false=我的好友（互相关注） */
-  @Local showFollowing: boolean = true;
+  @Local artists: ArtistInfo[] = [];
+  @Local listState: LoadState = LoadState.LOADING;
+  /** 列表页签：0=我的关注 1=我的好友 2=关注的歌手 */
+  @Local tab: number = 0;
 
   aboutToAppear(): void {
+    userStore().ensureInit();
     const p: UserProfile = userStore().profile;
     this.nickname = p.nickname;
     this.ageText = `${p.age}`;
     this.signature = p.signature;
-    this.loadFriends();
+    this.loadLists();
   }
 
-  private loadFriends(): void {
-    this.friendState = LoadState.LOADING;
-    ApiService.getFriends()
-      .then((list: FriendItem[]) => {
-        this.friends = list;
-        this.friendState = list.length === 0 ? LoadState.EMPTY : LoadState.SUCCESS;
+  private loadLists(): void {
+    this.listState = LoadState.LOADING;
+    Promise.all([ApiService.getFriends(), ApiService.getArtists()])
+      .then((result: [FriendItem[], ArtistInfo[]]) => {
+        this.friends = result[0];
+        this.artists = result[1];
+        this.listState = this.friends.length === 0 && this.artists.length === 0
+          ? LoadState.EMPTY : LoadState.SUCCESS;
       })
       .catch((e: Object) => {
-        console.error(`ProfilePage loadFriends failed: ${String(e)}`);
-        this.friendState = LoadState.ERROR;
+        console.error(`ProfilePage loadLists failed: ${String(e)}`);
+        this.listState = LoadState.ERROR;
       });
   }
 
@@ -67,12 +72,17 @@ export struct ProfilePage {
     promptAction.showToast({ message: '资料已保存' });
   }
 
-  /** 当前列表：关注=我关注的人；好友=互相关注的人 */
-  private currentList(): FriendItem[] {
-    if (this.showFollowing) {
+  /** 关注列表 / 好友列表（好友 = 互相关注） */
+  private currentFriends(): FriendItem[] {
+    if (this.tab === 0) {
       return this.friends.filter((f: FriendItem) => userStore().isFollowing(f.id));
     }
     return this.friends.filter((f: FriendItem) => f.mutual && userStore().isFollowing(f.id));
+  }
+
+  /** 我关注的歌手 */
+  private followedArtists(): ArtistInfo[] {
+    return this.artists.filter((a: ArtistInfo) => userStore().isFollowingArtist(a.id));
   }
 
   @Builder
@@ -96,6 +106,19 @@ export struct ProfilePage {
         .onChange(onChange)
     }
     .width('100%')
+  }
+
+  @Builder
+  TabChip(label: string, index: number) {
+    Text(label)
+      .fontSize(14)
+      .fontColor(this.tab === index ? Color.White : AppColors.TEXT_MAIN)
+      .padding({ left: 14, right: 14, top: 7, bottom: 7 })
+      .backgroundColor(this.tab === index ? AppColors.PRIMARY : AppColors.BG)
+      .borderRadius(16)
+      .onClick(() => {
+        this.tab = index;
+      })
   }
 
   build() {
@@ -170,46 +193,73 @@ export struct ProfilePage {
             .backgroundColor(AppColors.CARD)
             .borderRadius(12)
 
-            // 关注 / 好友列表卡
+            // 关注 / 好友 / 歌手 列表卡
             Column() {
               Row({ space: 8 }) {
-                Text(`关注 ${userStore().followingCount()}`)
-                  .fontSize(14)
-                  .fontColor(this.showFollowing ? Color.White : AppColors.TEXT_MAIN)
-                  .padding({ left: 14, right: 14, top: 7, bottom: 7 })
-                  .backgroundColor(this.showFollowing ? AppColors.PRIMARY : AppColors.BG)
-                  .borderRadius(16)
-                  .onClick(() => {
-                    this.showFollowing = true;
-                  })
-                Text('好友')
-                  .fontSize(14)
-                  .fontColor(this.showFollowing ? AppColors.TEXT_MAIN : Color.White)
-                  .padding({ left: 14, right: 14, top: 7, bottom: 7 })
-                  .backgroundColor(this.showFollowing ? AppColors.BG : AppColors.PRIMARY)
-                  .borderRadius(16)
-                  .onClick(() => {
-                    this.showFollowing = false;
-                  })
+                this.TabChip(`关注 ${userStore().followingCount()}`, 0)
+                this.TabChip('好友', 1)
+                this.TabChip(`歌手 ${userStore().followedArtistCount()}`, 2)
                 Blank()
               }
               .width('100%')
               .padding({ left: 16, right: 16, top: 12, bottom: 4 })
 
-              if (this.friendState === LoadState.LOADING) {
-                LoadingView({ tip: '好友列表加载中…' })
-              } else if (this.friendState === LoadState.ERROR) {
-                ErrorView({ message: '好友列表加载失败', onRetry: (): void => this.loadFriends() })
-              } else if (this.friendState === LoadState.EMPTY) {
-                EmptyView({ tip: '暂无推荐用户', icon: $r('sys.symbol.person') })
-              } else {
-                if (this.currentList().length === 0) {
+              if (this.listState === LoadState.LOADING) {
+                LoadingView({ tip: '列表加载中…' })
+              } else if (this.listState === LoadState.ERROR) {
+                ErrorView({ message: '列表加载失败', onRetry: (): void => this.loadLists() })
+              } else if (this.listState === LoadState.EMPTY) {
+                EmptyView({ tip: '暂无数据', icon: $r('sys.symbol.person') })
+              } else if (this.tab === 2) {
+                // 关注的歌手
+                if (this.followedArtists().length === 0) {
                   EmptyView({
-                    tip: this.showFollowing ? '还没有关注任何人' : '暂无互相关注的好友',
+                    tip: '还没有关注歌手，去播放页点歌手名进入主页关注吧',
                     icon: $r('sys.symbol.person')
                   })
                 } else {
-                  ForEach(this.currentList(), (f: FriendItem) => {
+                  ForEach(this.followedArtists(), (a: ArtistInfo) => {
+                    Row({ space: 10 }) {
+                      Image(a.avatar)
+                        .width(44)
+                        .height(44)
+                        .borderRadius(22)
+                        .objectFit(ImageFit.Cover)
+                        .alt($r('app.media.startIcon'))
+                      Column({ space: 3 }) {
+                        Text(a.name)
+                          .fontSize(15)
+                          .fontColor(AppColors.TEXT_MAIN)
+                        Text(`${a.genre} · ${formatCount(a.fans)}粉丝`)
+                          .fontSize(12)
+                          .fontColor(AppColors.TEXT_SUB)
+                          .maxLines(1)
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      }
+                      .alignItems(HorizontalAlign.Start)
+                      .layoutWeight(1)
+                      Text('已关注')
+                        .fontSize(12)
+                        .fontColor(AppColors.TEXT_SUB)
+                        .padding({ left: 12, right: 12, top: 5, bottom: 5 })
+                        .backgroundColor(AppColors.BG)
+                        .borderRadius(14)
+                        .onClick(() => userStore().toggleFollowArtist(a.id))
+                    }
+                    .width('100%')
+                    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+                    .onClick(() => Router.push(AppRoutes.ARTIST, a.name))
+                  }, (a: ArtistInfo) => a.id.toString())
+                }
+              } else {
+                // 关注 / 好友
+                if (this.currentFriends().length === 0) {
+                  EmptyView({
+                    tip: this.tab === 0 ? '还没有关注任何人' : '暂无互相关注的好友',
+                    icon: $r('sys.symbol.person')
+                  })
+                } else {
+                  ForEach(this.currentFriends(), (f: FriendItem) => {
                     Row({ space: 10 }) {
                       Image(f.avatar)
                         .width(44)

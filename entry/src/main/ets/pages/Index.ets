@@ -10,6 +10,7 @@ import { PlayerPage } from './PlayerPage';
 import { SearchPage } from './SearchPage';
 import { ProfilePage } from './ProfilePage';
 import { ListenRankPage } from './ListenRankPage';
+import { ArtistPage } from './ArtistPage';
 import { MiniPlayer } from '../components/MiniPlayer';
 import { TabBar } from '../components/TabBar';
 
@@ -42,6 +43,8 @@ struct Index {
       ProfilePage()
     } else if (name === AppRoutes.LISTEN_RANK) {
       ListenRankPage()
+    } else if (name === AppRoutes.ARTIST) {
+      ArtistPage({ artistName: param as string })
     }
   }
 

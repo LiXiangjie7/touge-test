@@ -1,5 +1,5 @@
-import { ArtistStat, DayStat, FriendItem, GenreStat, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
-import { MOCK_BANNERS, MOCK_FRIENDS, MOCK_HOT_SEARCH, MOCK_PLAYLISTS, MOCK_RANKS, MOCK_SONGS } from './MockData';
+import { ArtistDetail, ArtistInfo, ArtistStat, DayStat, FriendItem, GenreStat, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
+import { MOCK_ARTISTS, MOCK_BANNERS, MOCK_FRIENDS, MOCK_HOT_SEARCH, MOCK_PLAYLISTS, MOCK_RANKS, MOCK_SONGS } from './MockData';
 
 /** 网络状态模拟档位：正常 / 慢速网络 / 网络异常 / 空数据 */
 export type SimulateMode = 'normal' | 'slow' | 'error' | 'empty';
@@ -149,5 +149,26 @@ export class MockApi {
   /** 推荐用户列表（个人中心 -> 关注 / 好友列表） */
   static getFriends(): Promise<FriendItem[]> {
     return MockApi.pipe(MOCK_FRIENDS, [], 400);
+  }
+
+  /** 歌手列表（个人资料页"歌手"列表用） */
+  static getArtists(): Promise<ArtistInfo[]> {
+    return MockApi.pipe(MOCK_ARTISTS, [], 400);
+  }
+
+  /** 歌手主页：资料 + 该歌手的全部作品 */
+  static getArtistDetail(name: string): Promise<ArtistDetail> {
+    const found: ArtistInfo | undefined = MOCK_ARTISTS.find((a: ArtistInfo) => a.name === name);
+    const info: ArtistInfo = found ?? {
+      id: 0, name: name, avatar: `https://picsum.photos/seed/artist-${encodeURIComponent(name)}/300/300`,
+      fans: 0, genre: '未知', region: '未知', description: '暂无该歌手的详细资料'
+    };
+    const songs: Song[] = MOCK_SONGS.filter((s: Song) => s.artist === name);
+    const data: ArtistDetail = { info: info, songs: songs };
+    const empty: ArtistDetail = {
+      info: { id: 0, name: name, avatar: '', fans: 0, genre: '', region: '', description: '' },
+      songs: []
+    };
+    return MockApi.pipe(data, empty, 450);
   }
 }

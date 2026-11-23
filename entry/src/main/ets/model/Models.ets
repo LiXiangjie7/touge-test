@@ -101,6 +101,23 @@ export interface FriendItem {
   mutual: boolean;    // 是否互相关注（互为好友）
 }
 
+/** 歌手资料（歌手主页展示） */
+export interface ArtistInfo {
+  id: number;
+  name: string;
+  avatar: string;
+  fans: number;        // 粉丝数
+  genre: string;       // 主要曲风
+  region: string;      // 地区 / 类型
+  description: string; // 详细介绍
+}
+
+/** 歌手主页聚合数据：资料 + 全部作品 */
+export interface ArtistDetail {
+  info: ArtistInfo;
+  songs: Song[];
+}
+
 /** 统计页聚合数据（数据可视化加分项的数据源，基于个人真实听歌记录） */
 export interface ListenStats {
   weeklyMinutes: DayStat[];

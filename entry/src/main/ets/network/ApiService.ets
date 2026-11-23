@@ -1,4 +1,4 @@
-import { DayStat, FriendItem, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
+import { ArtistDetail, ArtistInfo, DayStat, FriendItem, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
 import { NetConfig } from '../common/Constants';
 import { HttpUtil } from './HttpUtil';
 import { MockApi } from './MockApi';
@@ -53,6 +53,16 @@ export class ApiService {
   /** 推荐用户（关注 / 好友列表） */
   static getFriends(): Promise<FriendItem[]> {
     return MockApi.getFriends();
+  }
+
+  /** 歌手列表 */
+  static getArtists(): Promise<ArtistInfo[]> {
+    return MockApi.getArtists();
+  }
+
+  /** 歌手主页：资料 + 全部作品 */
+  static getArtistDetail(name: string): Promise<ArtistDetail> {
+    return MockApi.getArtistDetail(name);
   }
 
   /** Banner -> 歌单 */

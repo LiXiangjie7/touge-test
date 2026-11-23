@@ -20,6 +20,8 @@ export class MusicStore {
   @Trace dailyMinutes: Record<string, number> = {};
   /** 每首歌的播放次数统计（按次数降序） */
   @Trace playStats: PlayStatItem[] = [];
+  /** 是否已从持久层恢复（防止 Previewer 中 EntryAbility 未执行导致数据为空） */
+  private inited: boolean = false;
 
   /** 从首选项恢复数据（EntryAbility.onCreate 调用） */
   init(): void {
@@ -37,6 +39,14 @@ export class MusicStore {
       this.history = [];
       this.dailyMinutes = {};
       this.playStats = [];
+    }
+    this.inited = true;
+  }
+
+  /** 确保已初始化（各方法/页面首次访问时兜底调用，幂等） */
+  ensureInit(): void {
+    if (!this.inited) {
+      this.init();
     }
   }
 
@@ -82,6 +92,7 @@ export class MusicStore {
    *  2. 该歌曲的累计播放次数 +1（驱动听歌排行与曲风/歌手占比）。
    */
   recordPlay(song: Song): void {
+    this.ensureInit();
     // 按天时长（整体替换以触发 @Trace 刷新）
     const key: string = dateKey(new Date());
     const nextDaily: Record<string, number> = {};

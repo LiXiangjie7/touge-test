@@ -22,6 +22,8 @@ export struct StatsPage {
   @Local state: LoadState = LoadState.LOADING;
 
   aboutToAppear(): void {
+    // 兜底：确保听歌记录已从持久层恢复（Previewer 中 EntryAbility 可能未执行）
+    musicStore().ensureInit();
     this.load();
   }
 

@@ -13,6 +13,10 @@ import { EmptyView } from '../components/StateViews';
  */
 @ComponentV2
 export struct ListenRankPage {
+  aboutToAppear(): void {
+    musicStore().ensureInit();
+  }
+
   build() {
     NavDestination() {
       Column() {

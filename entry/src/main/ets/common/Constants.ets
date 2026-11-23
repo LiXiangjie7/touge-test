@@ -26,6 +26,7 @@ export class AppRoutes {
   static readonly SEARCH: string = 'search';
   static readonly PROFILE: string = 'profile';
   static readonly LISTEN_RANK: string = 'listenRank';
+  static readonly ARTIST: string = 'artist';
 }
 
 /** 页面数据加载状态机：加载中 / 成功 / 空数据 / 异常 */
@@ -48,6 +49,8 @@ export class StoreKeys {
   static readonly PROFILE: string = 'user_profile';
   /** 我的关注用户 id 列表 */
   static readonly FOLLOWING: string = 'following_ids';
+  /** 我关注的歌手 id 列表 */
+  static readonly FOLLOW_ARTISTS: string = 'follow_artists';
   /** 网络状态模拟档位：normal / slow / error / empty */
   static readonly SIMULATE_MODE: string = 'simulate_mode';
 }

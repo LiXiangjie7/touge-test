@@ -1,4 +1,4 @@
-import { BannerItem, FriendItem, HotSearch, Playlist, RankList, Song } from '../model/Models';
+import { ArtistInfo, BannerItem, FriendItem, HotSearch, Playlist, RankList, Song } from '../model/Models';
 
 /**
  * 本地 Mock 数据源。
@@ -106,4 +106,27 @@ export const MOCK_FRIENDS: FriendItem[] = [
   { id: 6, name: '阿May', avatar: COVER('friend6'), signature: '听歌是一件私人的事', mutual: true },
   { id: 7, name: '老周不爱说话', avatar: COVER('friend7'), signature: '收藏了 312 首歌', mutual: false },
   { id: 8, name: '学习委员', avatar: COVER('friend8'), signature: '专注歌单持续更新中', mutual: false }
+];
+
+/** 歌手资料库（歌手主页 Mock 数据源，覆盖曲库全部歌手） */
+export const MOCK_ARTISTS: ArtistInfo[] = [
+  { id: 1, name: '周杰伦', avatar: COVER('artist1'), fans: 68200000, genre: '流行 / R&B', region: '中国台湾 · 男歌手', description: '华语流行乐坛标志性人物，融合 R&B、嘻哈与中国风，代表作《晴天》《七里香》《青花瓷》等，多次获得金曲奖。' },
+  { id: 2, name: '林俊杰', avatar: COVER('artist2'), fans: 45600000, genre: '流行', region: '新加坡 · 男歌手', description: '创作型实力歌手，唱功与创作俱佳，代表作《江南》《修炼爱情》《不为谁而作的歌》。' },
+  { id: 3, name: '邓紫棋', avatar: COVER('artist3'), fans: 52300000, genre: '流行', region: '中国香港 · 女歌手', description: '华语乐坛实力唱将，嗓音极具爆发力，代表作《光年之外》《泡沫》《句号》。' },
+  { id: 4, name: '李荣浩', avatar: COVER('artist4'), fans: 32100000, genre: '流行', region: '中国内地 · 男歌手', description: '一人包办词曲编混的全能音乐人，代表作《模特》《年少有为》《乌梅子酱》。' },
+  { id: 5, name: '薛之谦', avatar: COVER('artist5'), fans: 41800000, genre: '流行', region: '中国内地 · 男歌手', description: '以细腻"薛式情歌"著称，词作真挚戳心，代表作《演员》《丑八怪》《天外来物》。' },
+  { id: 6, name: '毛不易', avatar: COVER('artist6'), fans: 28900000, genre: '民谣 / 流行', region: '中国内地 · 男歌手', description: '唱作歌手，以平实温暖的叙事打动人心，代表作《消愁》《像我这样的人》《平凡的一天》。' },
+  { id: 7, name: '赵雷', avatar: COVER('artist7'), fans: 19700000, genre: '民谣', region: '中国内地 · 男歌手', description: '独立民谣音乐人，用歌声记录城市与生活，代表作《成都》《南方姑娘》《画》。' },
+  { id: 8, name: '房东的猫', avatar: COVER('artist8'), fans: 12500000, genre: '民谣', region: '中国内地 · 女子双人组合', description: '清新治愈系民谣组合，代表作《云烟成雨》《秋酿》《下一站茶山刘》。' },
+  { id: 9, name: '许嵩', avatar: COVER('artist9'), fans: 24600000, genre: '流行', region: '中国内地 · 男歌手', description: '独立创作音乐人，词曲风格独树一帜，代表作《雅俗共赏》《素颜》《有何不可》。' },
+  { id: 10, name: '陈粒', avatar: COVER('artist10'), fans: 15300000, genre: '民谣 / 独立', region: '中国内地 · 女歌手', description: '独立音乐人，风格空灵多变，代表作《奇妙能力歌》《小半》《易燃易爆炸》。' },
+  { id: 11, name: '草东没有派对', avatar: COVER('artist11'), fans: 11800000, genre: '摇滚', region: '中国台湾 · 乐队', description: '独立摇滚乐队，以犀利歌词与粗粝现场著称，代表作《山海》《大风吹》《烂泥》。' },
+  { id: 12, name: '告五人', avatar: COVER('artist12'), fans: 16200000, genre: '摇滚 / 流行', region: '中国台湾 · 乐队', description: '双人主唱乐队，旋律上口、现场感染力强，代表作《爱人错过》《唯一》《披星戴月的想你》。' },
+  { id: 13, name: '五月天', avatar: COVER('artist13'), fans: 58400000, genre: '摇滚', region: '中国台湾 · 乐队', description: '华语天团，陪伴一代人青春，代表作《倔强》《温柔》《突然好想你》。' },
+  { id: 14, name: '陈奕迅', avatar: COVER('artist14'), fans: 63500000, genre: '流行', region: '中国香港 · 男歌手', description: '华语乐坛歌王级人物，情感诠释细腻深刻，代表作《浮夸》《富士山下》《十年》。' },
+  { id: 15, name: '周深', avatar: COVER('artist15'), fans: 38700000, genre: '古风 / 流行', region: '中国内地 · 男歌手', description: '嗓音空灵纯净，跨越多种曲风，代表作《大鱼》《光亮》《花开忘忧》。' },
+  { id: 16, name: '胡梦周 / 马吟吟', avatar: COVER('artist16'), fans: 4200000, genre: '电子', region: '中国内地 · 组合', description: '电子音乐组合，代表作《溯》。' },
+  { id: 17, name: '电子银河', avatar: COVER('artist17'), fans: 1800000, genre: '电子', region: '中国内地 · 电子音乐人', description: '新生代电子音乐制作人，擅长合成器音色设计，代表作《星尘回响》。' },
+  { id: 18, name: 'HITA', avatar: COVER('artist18'), fans: 7600000, genre: '古风', region: '中国内地 · 女歌手', description: '古风圈知名歌手，戏腔婉转，代表作《赤伶》。' },
+  { id: 19, name: '银临 / Aki阿杰', avatar: COVER('artist19'), fans: 9800000, genre: '古风', region: '中国内地 · 组合', description: '古风音乐代表组合，代表作《牵丝戏》。' }
 ];

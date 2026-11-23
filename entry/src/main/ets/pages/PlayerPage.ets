@@ -1,4 +1,4 @@
-import { AppColors } from '../common/Constants';
+import { AppColors, AppRoutes } from '../common/Constants';
 import { Router } from '../common/Router';
 import { Song } from '../model/Models';
 import { LoopMode, PlayerController, playerState } from '../viewmodel/PlayerStore';
@@ -74,11 +74,23 @@ export struct PlayerPage {
               .fontColor(Color.White)
               .maxLines(1)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
-            Text(playerState.currentSong?.artist ?? '')
-              .fontSize(12)
-              .fontColor(AppColors.WHITE_60)
-              .maxLines(1)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
+            // 歌手名可点击：进入歌手主页（资料 + 全部作品 + 关注）
+            Row({ space: 2 }) {
+              Text(playerState.currentSong?.artist ?? '')
+                .fontSize(12)
+                .fontColor(AppColors.WHITE_60)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+              SymbolGlyph($r('sys.symbol.chevron_right'))
+                .fontSize(10)
+                .fontColor([AppColors.WHITE_30])
+            }
+            .onClick(() => {
+              const artist: string = playerState.currentSong?.artist ?? '';
+              if (artist.length > 0) {
+                Router.push(AppRoutes.ARTIST, artist);
+              }
+            })
           }
           .alignItems(HorizontalAlign.Center)
           .layoutWeight(1)

@@ -25,6 +25,12 @@ export struct MinePage {
   private readonly modeLabels: string[] = ['正常', '慢速网络', '网络异常', '空数据'];
   private readonly modeValues: string[] = ['normal', 'slow', 'error', 'empty'];
 
+  aboutToAppear(): void {
+    // 兜底：Previewer 中 EntryAbility 可能未执行，确保数据已从持久层恢复
+    musicStore().ensureInit();
+    userStore().ensureInit();
+  }
+
   private onSelectMode(index: number): void {
     this.simulateMode = this.modeValues[index];
     MockApi.simulateMode = this.modeValues[index] as SimulateMode;
@@ -52,7 +58,7 @@ export struct MinePage {
               .fontColor(AppColors.TEXT_SUB)
               .maxLines(1)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
-            Text(`${userStore().profile.age}岁 · 关注 ${userStore().followingCount()}`)
+            Text(`${userStore().profile.age}岁 · 关注 ${userStore().followingCount()} · 歌手 ${userStore().followedArtistCount()}`)
               .fontSize(11)
               .fontColor(AppColors.TEXT_LIGHT)
           }
