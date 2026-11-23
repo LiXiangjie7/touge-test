@@ -8,6 +8,8 @@ import { MinePage } from './MinePage';
 import { PlaylistDetailPage } from './PlaylistDetailPage';
 import { PlayerPage } from './PlayerPage';
 import { SearchPage } from './SearchPage';
+import { ProfilePage } from './ProfilePage';
+import { ListenRankPage } from './ListenRankPage';
 import { MiniPlayer } from '../components/MiniPlayer';
 import { TabBar } from '../components/TabBar';
 
@@ -36,6 +38,10 @@ struct Index {
       PlayerPage()
     } else if (name === AppRoutes.SEARCH) {
       SearchPage()
+    } else if (name === AppRoutes.PROFILE) {
+      ProfilePage()
+    } else if (name === AppRoutes.LISTEN_RANK) {
+      ListenRankPage()
     }
   }
 

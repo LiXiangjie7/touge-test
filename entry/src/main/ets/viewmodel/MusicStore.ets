@@ -1,12 +1,14 @@
 import { AppStorageV2 } from '@kit.ArkUI';
-import { Song } from '../model/Models';
+import { PlayStatItem, Song } from '../model/Models';
 import { PreferencesUtil } from '../utils/PreferencesUtil';
 import { StoreKeys } from '../common/Constants';
+import { dateKey } from '../utils/Format';
 
 /**
  * 全局数据仓库（状态管理 V2：@ObservedV2 + @Trace + AppStorageV2）。
- * 管理：我喜欢的音乐、最近播放、今日额外听歌时长，
+ * 管理：我喜欢的音乐、最近播放、个人听歌统计（按天时长 + 每首歌播放次数），
  * 全部通过 Preferences 持久化，重启应用后数据不丢失。
+ * 统计页的折线图 / 曲风占比 / 歌手 Top / 听歌排行全部基于这里的真实听歌记录。
  */
 @ObservedV2
 export class MusicStore {
@@ -14,21 +16,28 @@ export class MusicStore {
   @Trace favorites: Song[] = [];
   /** 最近播放（最新在前，最多 50 条） */
   @Trace history: Song[] = [];
-  /** 今日额外听歌分钟数（叠加进统计图表，体现图表动态更新） */
-  @Trace extraMinutesToday: number = 0;
+  /** 按天听歌时长：{ 'yyyy-MM-dd': 分钟数 } */
+  @Trace dailyMinutes: Record<string, number> = {};
+  /** 每首歌的播放次数统计（按次数降序） */
+  @Trace playStats: PlayStatItem[] = [];
 
   /** 从首选项恢复数据（EntryAbility.onCreate 调用） */
   init(): void {
     const favRaw: string = PreferencesUtil.getString(StoreKeys.FAVORITES, '[]');
     const hisRaw: string = PreferencesUtil.getString(StoreKeys.HISTORY, '[]');
+    const dailyRaw: string = PreferencesUtil.getString(StoreKeys.DAILY_MINUTES, '{}');
+    const statsRaw: string = PreferencesUtil.getString(StoreKeys.PLAY_STATS, '[]');
     try {
       this.favorites = JSON.parse(favRaw) as Song[];
       this.history = JSON.parse(hisRaw) as Song[];
+      this.dailyMinutes = JSON.parse(dailyRaw) as Record<string, number>;
+      this.playStats = JSON.parse(statsRaw) as PlayStatItem[];
     } catch (e) {
       this.favorites = [];
       this.history = [];
+      this.dailyMinutes = {};
+      this.playStats = [];
     }
-    this.extraMinutesToday = PreferencesUtil.getNumber(StoreKeys.EXTRA_MINUTES, 0);
   }
 
   isFavorite(songId: number): boolean {
@@ -57,10 +66,57 @@ export class MusicStore {
     PreferencesUtil.putString(StoreKeys.HISTORY, '[]');
   }
 
-  /** 记录一次播放：按歌曲时长折算分钟数叠加到今日统计 */
+  /** 今日听歌分钟数（由按天统计得出） */
+  todayMinutes(): number {
+    return this.dailyMinutes[dateKey(new Date())] ?? 0;
+  }
+
+  /** 累计播放次数 */
+  totalPlays(): number {
+    return this.playStats.reduce((sum: number, p: PlayStatItem) => sum + p.count, 0);
+  }
+
+  /**
+   * 记录一次播放：
+   *  1. 按歌曲时长折算分钟数，叠加到"今天"的按天统计（驱动近 7 日折线图）；
+   *  2. 该歌曲的累计播放次数 +1（驱动听歌排行与曲风/歌手占比）。
+   */
   recordPlay(song: Song): void {
-    this.extraMinutesToday += song.duration / 60000;
-    PreferencesUtil.putNumber(StoreKeys.EXTRA_MINUTES, this.extraMinutesToday);
+    // 按天时长（整体替换以触发 @Trace 刷新）
+    const key: string = dateKey(new Date());
+    const nextDaily: Record<string, number> = {};
+    Object.keys(this.dailyMinutes).forEach((k: string) => {
+      nextDaily[k] = this.dailyMinutes[k];
+    });
+    nextDaily[key] = (nextDaily[key] ?? 0) + song.duration / 60000;
+    // 只保留最近 30 天的记录，避免无限增长
+    const keys: string[] = Object.keys(nextDaily).sort();
+    const trimmed: Record<string, number> = {};
+    keys.slice(-30).forEach((k: string) => {
+      trimmed[k] = nextDaily[k];
+    });
+    this.dailyMinutes = trimmed;
+    PreferencesUtil.putString(StoreKeys.DAILY_MINUTES, JSON.stringify(this.dailyMinutes));
+
+    // 单曲播放次数
+    const existed: PlayStatItem | undefined =
+      this.playStats.find((p: PlayStatItem) => p.song.id === song.id);
+    let nextStats: PlayStatItem[];
+    if (existed !== undefined) {
+      nextStats = this.playStats.map((p: PlayStatItem): PlayStatItem => {
+        if (p.song.id === song.id) {
+          const updated: PlayStatItem = { song: p.song, count: p.count + 1, lastPlay: Date.now() };
+          return updated;
+        }
+        return p;
+      });
+    } else {
+      const created: PlayStatItem = { song: song, count: 1, lastPlay: Date.now() };
+      nextStats = [...this.playStats, created];
+    }
+    nextStats.sort((a: PlayStatItem, b: PlayStatItem) => b.count - a.count);
+    this.playStats = nextStats;
+    PreferencesUtil.putString(StoreKeys.PLAY_STATS, JSON.stringify(this.playStats));
   }
 }
 

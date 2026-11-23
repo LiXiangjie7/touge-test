@@ -77,11 +77,37 @@ export interface ArtistStat {
   count: number;
 }
 
-/** 统计页聚合数据（数据可视化加分项的数据源） */
+/** 个人播放记录条目：某首歌的累计播放次数 */
+export interface PlayStatItem {
+  song: Song;
+  count: number;     // 累计播放次数
+  lastPlay: number;  // 最近播放时间戳（毫秒）
+}
+
+/** 用户个人资料（个人中心可编辑，Preferences 持久化） */
+export interface UserProfile {
+  nickname: string;   // 姓名 / 昵称
+  age: number;        // 年龄
+  signature: string;  // 个人名片（签名）
+  avatarSeed: string; // 头像图种子
+}
+
+/** 关注 / 好友条目 */
+export interface FriendItem {
+  id: number;
+  name: string;
+  avatar: string;
+  signature: string;
+  mutual: boolean;    // 是否互相关注（互为好友）
+}
+
+/** 统计页聚合数据（数据可视化加分项的数据源，基于个人真实听歌记录） */
 export interface ListenStats {
   weeklyMinutes: DayStat[];
   genreShare: GenreStat[];
   topArtists: ArtistStat[];
+  topSongs: PlayStatItem[];  // 听过的歌曲及播放次数（降序）
   totalMinutes: number;
-  totalSongs: number;
+  totalSongs: number;        // 听过的歌曲数
+  totalPlays: number;        // 累计播放次数
 }

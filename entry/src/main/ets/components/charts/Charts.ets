@@ -16,6 +16,8 @@ const PALETTE: string[] = ['#EC4141', '#FF8A5C', '#FFC24B', '#5BB98C', '#5B8FF9'
 export struct LineChart {
   @Require @Param data: DayStat[];
   @Param title: string = '';
+  /** 点击图表卡片（用于跳转听歌排行详情） */
+  @Event onChartClick: () => void = () => {};
   private ctx: CanvasRenderingContext2D = new CanvasRenderingContext2D(new RenderingContextSettings(true));
   private ready: boolean = false;
 
@@ -86,11 +88,20 @@ export struct LineChart {
   build() {
     Column({ space: 8 }) {
       if (this.title.length > 0) {
-        Text(this.title)
-          .fontSize(15)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(AppColors.TEXT_MAIN)
-          .width('100%')
+        Row() {
+          Text(this.title)
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(AppColors.TEXT_MAIN)
+          Blank()
+          Text('听歌排行')
+            .fontSize(12)
+            .fontColor(AppColors.TEXT_SUB)
+          SymbolGlyph($r('sys.symbol.chevron_right'))
+            .fontSize(14)
+            .fontColor([AppColors.TEXT_LIGHT])
+        }
+        .width('100%')
       }
       Canvas(this.ctx)
         .width('100%')
@@ -104,6 +115,7 @@ export struct LineChart {
     .padding(14)
     .backgroundColor(AppColors.CARD)
     .borderRadius(12)
+    .onClick(() => this.onChartClick())
   }
 }
 
@@ -175,7 +187,7 @@ export struct PieChart {
             Row({ space: 6 }) {
               Circle({ width: 8, height: 8 })
                 .fill(PALETTE[i % PALETTE.length])
-              Text(`${d.genre} ${d.count}首`)
+              Text(`${d.genre} ${d.count}次`)
                 .fontSize(12)
                 .fontColor(AppColors.TEXT_SUB)
             }

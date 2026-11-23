@@ -24,6 +24,8 @@ export class AppRoutes {
   static readonly PLAYLIST_DETAIL: string = 'playlistDetail';
   static readonly PLAYER: string = 'player';
   static readonly SEARCH: string = 'search';
+  static readonly PROFILE: string = 'profile';
+  static readonly LISTEN_RANK: string = 'listenRank';
 }
 
 /** 页面数据加载状态机：加载中 / 成功 / 空数据 / 异常 */
@@ -38,7 +40,14 @@ export enum LoadState {
 export class StoreKeys {
   static readonly FAVORITES: string = 'favorites';
   static readonly HISTORY: string = 'history';
-  static readonly EXTRA_MINUTES: string = 'extra_minutes';
+  /** 按天听歌时长：{ 'yyyy-MM-dd': 分钟数 } */
+  static readonly DAILY_MINUTES: string = 'daily_minutes';
+  /** 每首歌的累计播放次数统计 */
+  static readonly PLAY_STATS: string = 'play_stats';
+  /** 用户个人资料 */
+  static readonly PROFILE: string = 'user_profile';
+  /** 我的关注用户 id 列表 */
+  static readonly FOLLOWING: string = 'following_ids';
   /** 网络状态模拟档位：normal / slow / error / empty */
   static readonly SIMULATE_MODE: string = 'simulate_mode';
 }

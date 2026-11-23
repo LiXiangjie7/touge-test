@@ -1,4 +1,4 @@
-import { BannerItem, HotSearch, Playlist, RankList, Song } from '../model/Models';
+import { BannerItem, FriendItem, HotSearch, Playlist, RankList, Song } from '../model/Models';
 
 /**
  * 本地 Mock 数据源。
@@ -94,4 +94,16 @@ export const MOCK_HOT_SEARCH: HotSearch[] = [
   { keyword: '学习 纯音乐', score: 489000 },
   { keyword: '古风', score: 432000 },
   { keyword: '电子', score: 377000 }
+];
+
+/** 推荐用户（关注 / 好友列表的 Mock 数据源，mutual=true 表示互相关注即好友） */
+export const MOCK_FRIENDS: FriendItem[] = [
+  { id: 1, name: '民谣小站', avatar: COVER('friend1'), signature: '一把吉他一个故事', mutual: true },
+  { id: 2, name: '摇滚现场', avatar: COVER('friend2'), signature: '永远年轻，永远热泪盈眶', mutual: true },
+  { id: 3, name: '深夜电台', avatar: COVER('friend3'), signature: '每晚 23 点，陪你入睡', mutual: true },
+  { id: 4, name: '古风雅集', avatar: COVER('friend4'), signature: '一曲入梦，余音绕梁', mutual: false },
+  { id: 5, name: '电音工厂', avatar: COVER('friend5'), signature: '律动加载中…', mutual: false },
+  { id: 6, name: '阿May', avatar: COVER('friend6'), signature: '听歌是一件私人的事', mutual: true },
+  { id: 7, name: '老周不爱说话', avatar: COVER('friend7'), signature: '收藏了 312 首歌', mutual: false },
+  { id: 8, name: '学习委员', avatar: COVER('friend8'), signature: '专注歌单持续更新中', mutual: false }
 ];

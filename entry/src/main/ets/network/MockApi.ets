@@ -1,5 +1,5 @@
-import { ArtistStat, DayStat, GenreStat, HomeData, HotSearch, ListenStats, Playlist, RankList, Song } from '../model/Models';
-import { MOCK_BANNERS, MOCK_HOT_SEARCH, MOCK_PLAYLISTS, MOCK_RANKS, MOCK_SONGS } from './MockData';
+import { ArtistStat, DayStat, FriendItem, GenreStat, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
+import { MOCK_BANNERS, MOCK_FRIENDS, MOCK_HOT_SEARCH, MOCK_PLAYLISTS, MOCK_RANKS, MOCK_SONGS } from './MockData';
 
 /** 网络状态模拟档位：正常 / 慢速网络 / 网络异常 / 空数据 */
 export type SimulateMode = 'normal' | 'slow' | 'error' | 'empty';
@@ -101,24 +101,15 @@ export class MockApi {
 
   /**
    * 听歌统计数据（数据可视化加分项的数据源）。
-   * extraTodayMinutes：本地真实记录的今日听歌时长，会叠加进"今天"的柱子，
-   * 体现图表随数据动态更新。
+   * 入参为本地真实听歌记录（近 7 日时长 + 每首歌播放次数），
+   * 模拟"上传听歌记录 -> 服务端聚合 -> 返回统计结果"的完整链路；
+   * 曲风占比与歌手 Top 均按用户实际听过的歌曲聚合。
    */
-  static getListenStats(extraTodayMinutes: number): Promise<ListenStats> {
-    const weekly: DayStat[] = [
-      { label: '周一', minutes: 45 },
-      { label: '周二', minutes: 32 },
-      { label: '周三', minutes: 78 },
-      { label: '周四', minutes: 20 },
-      { label: '周五', minutes: 95 },
-      { label: '周六', minutes: 120 },
-      { label: '今天', minutes: 66 + Math.round(extraTodayMinutes) }
-    ];
-
-    // 曲风占比：由曲库真实分布统计得出
+  static getListenStats(weekly: DayStat[], plays: PlayStatItem[]): Promise<ListenStats> {
+    // 曲风占比：按"我听过的歌"的曲风分布聚合（权重 = 播放次数）
     const genreMap: Map<string, number> = new Map<string, number>();
-    MOCK_SONGS.forEach((s: Song) => {
-      genreMap.set(s.genre, (genreMap.get(s.genre) ?? 0) + 1);
+    plays.forEach((p: PlayStatItem) => {
+      genreMap.set(p.song.genre, (genreMap.get(p.song.genre) ?? 0) + p.count);
     });
     const genreShare: GenreStat[] = [];
     genreMap.forEach((count: number, genre: string) => {
@@ -126,10 +117,10 @@ export class MockApi {
     });
     genreShare.sort((a: GenreStat, b: GenreStat) => b.count - a.count);
 
-    // 歌手收听 Top：由曲库歌手出现频次统计得出
+    // 常听歌手 Top：按"我听过的歌"的歌手播放次数聚合
     const artistMap: Map<string, number> = new Map<string, number>();
-    MOCK_SONGS.forEach((s: Song) => {
-      artistMap.set(s.artist, (artistMap.get(s.artist) ?? 0) + 1);
+    plays.forEach((p: PlayStatItem) => {
+      artistMap.set(p.song.artist, (artistMap.get(p.song.artist) ?? 0) + p.count);
     });
     const topArtists: ArtistStat[] = [];
     artistMap.forEach((count: number, artist: string) => {
@@ -138,16 +129,25 @@ export class MockApi {
     topArtists.sort((a: ArtistStat, b: ArtistStat) => b.count - a.count);
 
     const totalMinutes: number = weekly.reduce((sum: number, d: DayStat) => sum + d.minutes, 0);
+    const totalPlays: number = plays.reduce((sum: number, p: PlayStatItem) => sum + p.count, 0);
     const stats: ListenStats = {
       weeklyMinutes: weekly,
       genreShare: genreShare,
       topArtists: topArtists.slice(0, 5),
+      topSongs: plays.slice(0, 50),
       totalMinutes: totalMinutes,
-      totalSongs: MOCK_SONGS.length
+      totalSongs: plays.length,
+      totalPlays: totalPlays
     };
     const empty: ListenStats = {
-      weeklyMinutes: [], genreShare: [], topArtists: [], totalMinutes: 0, totalSongs: 0
+      weeklyMinutes: [], genreShare: [], topArtists: [], topSongs: [],
+      totalMinutes: 0, totalSongs: 0, totalPlays: 0
     };
     return MockApi.pipe(stats, empty, 500);
+  }
+
+  /** 推荐用户列表（个人中心 -> 关注 / 好友列表） */
+  static getFriends(): Promise<FriendItem[]> {
+    return MockApi.pipe(MOCK_FRIENDS, [], 400);
   }
 }

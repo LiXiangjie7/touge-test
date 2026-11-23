@@ -1,15 +1,18 @@
-import { AppColors, StoreKeys } from '../common/Constants';
+import { AppColors, AppRoutes, StoreKeys } from '../common/Constants';
+import { Router } from '../common/Router';
 import { Song } from '../model/Models';
 import { MockApi, SimulateMode } from '../network/MockApi';
 import { PlayerController } from '../viewmodel/PlayerStore';
 import { musicStore } from '../viewmodel/MusicStore';
+import { userStore } from '../viewmodel/UserStore';
 import { PreferencesUtil } from '../utils/PreferencesUtil';
 import { SongListItem } from '../components/SongListItem';
 import { EmptyView } from '../components/StateViews';
 
 /**
  * 我的页面：
- * 用户信息卡 + 数据统计 + 我喜欢的音乐 + 最近播放（均经 Preferences 持久化）
+ * 用户信息卡（点击进入个人资料页，可编辑姓名/年龄/个人名片、查看关注与好友列表）
+ * + 数据统计 + 我喜欢的音乐 + 最近播放（均经 Preferences 持久化）
  * + 设置区（"网络状态模拟"四档切换：正常/慢速网络/网络异常/空数据，
  *   用于演示各页面的加载提示、失败重试与空数据容错）。
  */
@@ -31,22 +34,27 @@ export struct MinePage {
   build() {
     Scroll() {
       Column({ space: 14 }) {
-        // 用户卡片
+        // 用户卡片（点击进入个人资料页）
         Row({ space: 12 }) {
-          Image('https://picsum.photos/seed/yunle-avatar/200/200')
+          Image(`https://picsum.photos/seed/${userStore().profile.avatarSeed}/200/200`)
             .width(58)
             .height(58)
             .borderRadius(29)
             .objectFit(ImageFit.Cover)
             .alt($r('app.media.startIcon'))
           Column({ space: 4 }) {
-            Text('云乐村民')
+            Text(userStore().profile.nickname)
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
               .fontColor(AppColors.TEXT_MAIN)
-            Text('保持热爱，奔赴山海')
+            Text(userStore().profile.signature)
               .fontSize(12)
               .fontColor(AppColors.TEXT_SUB)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+            Text(`${userStore().profile.age}岁 · 关注 ${userStore().followingCount()}`)
+              .fontSize(11)
+              .fontColor(AppColors.TEXT_LIGHT)
           }
           .alignItems(HorizontalAlign.Start)
           .layoutWeight(1)
@@ -58,6 +66,7 @@ export struct MinePage {
         .padding(16)
         .backgroundColor(AppColors.CARD)
         .borderRadius(12)
+        .onClick(() => Router.push(AppRoutes.PROFILE))
 
         // 数据统计行
         Row() {
@@ -82,7 +91,7 @@ export struct MinePage {
           }
           .layoutWeight(1)
           Column({ space: 4 }) {
-            Text(`${Math.round(musicStore().extraMinutesToday)}`)
+            Text(`${Math.round(musicStore().todayMinutes())}`)
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
               .fontColor(AppColors.TEXT_MAIN)

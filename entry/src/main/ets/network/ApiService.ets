@@ -1,4 +1,4 @@
-import { HomeData, HotSearch, ListenStats, Playlist, RankList, Song } from '../model/Models';
+import { DayStat, FriendItem, HomeData, HotSearch, ListenStats, Playlist, PlayStatItem, RankList, Song } from '../model/Models';
 import { NetConfig } from '../common/Constants';
 import { HttpUtil } from './HttpUtil';
 import { MockApi } from './MockApi';
@@ -42,9 +42,17 @@ export class ApiService {
     return MockApi.getHotSearch();
   }
 
-  /** 听歌统计（叠加本地记录的今日时长） */
-  static getListenStats(extraTodayMinutes: number): Promise<ListenStats> {
-    return MockApi.getListenStats(extraTodayMinutes);
+  /**
+   * 听歌统计：上传本地真实听歌记录（近 7 日时长 + 每首歌播放次数），
+   * 由"服务端"聚合成图表数据返回。
+   */
+  static getListenStats(weekly: DayStat[], plays: PlayStatItem[]): Promise<ListenStats> {
+    return MockApi.getListenStats(weekly, plays);
+  }
+
+  /** 推荐用户（关注 / 好友列表） */
+  static getFriends(): Promise<FriendItem[]> {
+    return MockApi.getFriends();
   }
 
   /** Banner -> 歌单 */

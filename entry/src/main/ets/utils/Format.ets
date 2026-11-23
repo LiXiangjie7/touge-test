@@ -22,3 +22,31 @@ export function formatCount(n: number): string {
   }
   return `${n}`;
 }
+
+/** 日期 -> 'yyyy-MM-dd' 键（按天统计听歌时长用） */
+export function dateKey(d: Date): string {
+  const m: number = d.getMonth() + 1;
+  const day: number = d.getDate();
+  return `${d.getFullYear()}-${m < 10 ? `0${m}` : `${m}`}-${day < 10 ? `0${day}` : `${day}`}`;
+}
+
+/** 近 7 天的日期键与横轴标签（今天显示"今天"，其余显示"周X"），按时间升序 */
+export function recentDayRefs(): DayRef[] {
+  const weekNames: string[] = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const refs: DayRef[] = [];
+  const now: Date = new Date();
+  for (let i: number = 6; i >= 0; i--) {
+    const d: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    refs.push({
+      key: dateKey(d),
+      label: i === 0 ? '今天' : weekNames[d.getDay()]
+    });
+  }
+  return refs;
+}
+
+/** 近 7 天日期的键与标签 */
+export interface DayRef {
+  key: string;
+  label: string;
+}
