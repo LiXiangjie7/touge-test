@@ -40,7 +40,7 @@ export struct MiniPlayer {
           .fontSize(26)
           .fontColor([AppColors.PRIMARY])
           .onClick(() => PlayerController.toggle())
-        SymbolGlyph($r('sys.symbol.forward_fill'))
+        SymbolGlyph($r('sys.symbol.forward_end_fill'))
           .fontSize(20)
           .fontColor([AppColors.TEXT_SUB])
           .onClick(() => PlayerController.next())

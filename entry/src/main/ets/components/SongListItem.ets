@@ -53,7 +53,7 @@ export struct SongListItem {
       .layoutWeight(1)
 
       if (this.isPlayingThis()) {
-        SymbolGlyph($r('sys.symbol.music_note'))
+        SymbolGlyph($r('sys.symbol.music'))
           .fontSize(16)
           .fontColor([AppColors.PRIMARY])
       }

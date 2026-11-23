@@ -58,7 +58,7 @@ export struct ErrorView {
 @ComponentV2
 export struct EmptyView {
   @Param tip: string = '暂无数据';
-  @Param icon: Resource = $r('sys.symbol.music_note');
+  @Param icon: Resource = $r('sys.symbol.music');
 
   build() {
     Column({ space: 12 }) {

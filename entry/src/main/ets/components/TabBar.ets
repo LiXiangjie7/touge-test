@@ -23,8 +23,8 @@ export struct TabBar {
   private tabs(): TabInfo[] {
     return [
       new TabInfo('发现', $r('sys.symbol.house_fill')),
-      new TabInfo('排行', $r('sys.symbol.chart_bar_fill')),
-      new TabInfo('统计', $r('sys.symbol.chart_pie_fill')),
+      new TabInfo('排行', $r('sys.symbol.ranking_fill')),
+      new TabInfo('统计', $r('sys.symbol.histogram_fill')),
       new TabInfo('我的', $r('sys.symbol.person_crop_circle_fill'))
     ];
   }

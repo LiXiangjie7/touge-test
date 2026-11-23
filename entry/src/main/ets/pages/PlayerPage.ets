@@ -171,7 +171,7 @@ export struct PlayerPage {
             .fontColor([Color.White])
             .onClick(() => PlayerController.switchMode())
             .layoutWeight(1)
-          SymbolGlyph($r('sys.symbol.backward_fill'))
+          SymbolGlyph($r('sys.symbol.backward_end_fill'))
             .fontSize(30)
             .fontColor([Color.White])
             .onClick(() => PlayerController.prev())
@@ -192,7 +192,7 @@ export struct PlayerPage {
           }
           .layoutWeight(1)
           .onClick(() => PlayerController.toggle())
-          SymbolGlyph($r('sys.symbol.forward_fill'))
+          SymbolGlyph($r('sys.symbol.forward_end_fill'))
             .fontSize(30)
             .fontColor([Color.White])
             .onClick(() => PlayerController.next())
